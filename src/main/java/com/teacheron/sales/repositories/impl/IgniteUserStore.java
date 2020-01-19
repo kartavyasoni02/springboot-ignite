@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import com.teacheron.sales.entities.UserEntry;
 import com.teacheron.sales.repositories.UserStore;
 
-
+@Component
 public class IgniteUserStore implements UserStore {
 	
 	/*
