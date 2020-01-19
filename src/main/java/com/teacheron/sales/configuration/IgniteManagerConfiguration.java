@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import com.teacheron.sales.entities.CacheNames;
 import com.teacheron.sales.entities.UserEntry;
 
-@Configuration
+//@Configuration
 public class IgniteManagerConfiguration {
 
     @Value("${ignite.enableFilePersistence}")
@@ -35,7 +35,7 @@ public class IgniteManagerConfiguration {
     private String ignitePersistenceFilePath;
 	private static final String DATA_CONFIG_NAME = "MyDataRegionConfiguration";
 
-	@Bean
+	//@Bean
     IgniteConfiguration igniteConfiguration() {
         IgniteConfiguration igniteConfiguration = new IgniteConfiguration();
 		igniteConfiguration.setWorkDirectory(ignitePersistenceFilePath);
@@ -96,7 +96,7 @@ public class IgniteManagerConfiguration {
         return igniteConfiguration;
     }
 
-    @Bean(destroyMethod = "close")
+    //@Bean(destroyMethod = "close")
     Ignite ignite(IgniteConfiguration igniteConfiguration) throws IgniteException {
 	    final Ignite ignite = Ignition.start(igniteConfiguration);
 	    // Activate the cluster. Automatic topology initialization occurs

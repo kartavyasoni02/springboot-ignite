@@ -1,48 +1,68 @@
 package com.teacheron.sales.repositories.impl;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import javax.cache.Cache;
-
-import org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteCache;
-import org.apache.ignite.cache.query.SqlQuery;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.teacheron.sales.entities.CacheNames;
 import com.teacheron.sales.entities.UserEntry;
 import com.teacheron.sales.repositories.UserStore;
 
-@Component
+
 public class IgniteUserStore implements UserStore {
 	
-	@Autowired
-    private Ignite ignite;
+	/*
+	 * @Autowired private Ignite ignite;
+	 */
 	
 	@Override
-    public UserEntry createUserEntry(UserEntry userEntry) {
-		final IgniteCache<String, UserEntry> userCache = getUserCache();
-        // insert into the key value store
-        userCache.put(userEntry.getFirstName(), userEntry);
+    public UserEntry createUserEntry(UserEntry userEntry) throws ClassNotFoundException, SQLException {
+		
+		try (PreparedStatement stmt =
+				getConnection().prepareStatement("INSERT INTO Users (id, firstName, lastName, address) VALUES (?, ?, ?, ?)")) {
+
+		    stmt.setInt(1, userEntry.getId());
+		    stmt.setString(2, userEntry.getFirstName());
+		    stmt.setString(3, userEntry.getLastName());
+		    stmt.setString(4, userEntry.getAddress());
+		    stmt.executeUpdate();
+		}
 		return userEntry;
-        
     }
 	
 	@Override
-    public List<UserEntry> getAllUsers() {
-        final String sql = "select * from UserEntry";
-        SqlQuery<String, UserEntry> query = new SqlQuery<>(UserEntry.class, sql);
-        return getUserCache().query(query).getAll()
-                .stream()
-                .map(Cache.Entry::getValue)
-                .collect(Collectors.toList());
+    public List<UserEntry> getAllUsers() throws ClassNotFoundException, SQLException {
+		 List<UserEntry> userList = null;
+			// Get data
+	        try (Statement stmt = getConnection().createStatement()) {
+	            try (ResultSet rs =
+	                         stmt.executeQuery("SELECT firstName, lastName, address FROM Users")) {
+
+	                userList = new ArrayList<>();
+	                while (rs.next()) {
+	                	UserEntry user = new UserEntry();
+	                	user.setFirstName(rs.getString("firstName"));
+	                	user.setLastName(rs.getString("lastName"));
+	                	user.setAddress(rs.getString("address"));
+	                	userList.add(user);
+	                }
+	                    
+	            }
+	        }
+			return userList;
 
     }
 	
-	public IgniteCache<String, UserEntry> getUserCache() {
-        return ignite.getOrCreateCache(CacheNames.Users.name());
+	public Connection getConnection() throws ClassNotFoundException, SQLException {
+		Class.forName("org.apache.ignite.IgniteJdbcThinDriver");
+		// Open JDBC connection
+		return DriverManager.getConnection("jdbc:ignite:thin://127.0.0.1:10800;user=ignite;password=ignite");
     }
 
 }

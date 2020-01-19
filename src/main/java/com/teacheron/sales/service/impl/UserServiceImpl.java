@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.apache.ignite.client.ClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +33,12 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UserDto> getUsers() {
+	public List<UserDto> getUsers() throws ClientException, Exception {
 		return userMapper.mapToDtos(userStore.getAllUsers());
 	}
 
 	@Override
-	public UserDto saveUser(@Valid UserDto userDto) {
+	public UserDto saveUser(@Valid UserDto userDto) throws ClientException, Exception {
 		return userMapper.mapToDto(userStore.createUserEntry(userMapper.mapToEntry(userDto)));
 	}
 

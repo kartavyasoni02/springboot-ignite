@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.apache.ignite.client.ClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,12 +32,12 @@ public class UserController {
 	}
 
 	@GetMapping()
-	public List<UserDto> getUser(){
+	public List<UserDto> getUser() throws ClientException, Exception{
 		return userService.getUsers();
 	}
 	
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE , produces = MediaType.APPLICATION_JSON_VALUE)
-	public UserDto saveUser(@Valid @RequestBody UserDto userDto){
+	public UserDto saveUser(@Valid @RequestBody UserDto userDto) throws ClientException, Exception{
 		return userService.saveUser(userDto);
 	}
 	
