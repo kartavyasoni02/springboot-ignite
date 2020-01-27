@@ -48,7 +48,7 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public String getUserByEmailid(String emailId) throws ClientException, Exception {
 		try (IgniteClient client = Ignition.startClient(
-				new ClientConfiguration().setAddresses("127.0.0.1:10800")
+				new ClientConfiguration().setAddresses("127.0.0.1:10800").setUserName("ignite").setUserPassword("ignite")
 				)) { 
 			ClientCacheConfiguration cacheCfg = new ClientCacheConfiguration()
 					.setName("user")
@@ -74,11 +74,25 @@ public class UserRepositoryImpl implements UserRepository {
 				rs.getString("emailId")
 				));
 	}
+	
+	@Override
+	public void loadCache() throws ClientException, Exception {
+		List<UserEntry> allusers = getAllUsers();
+		allusers.stream().forEach(user -> {
+			try {
+				updateCache(user);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+	}
+	
 
 	@Override
 	public void updateCache(UserEntry user) throws ClientException, Exception {
 		try (IgniteClient client = Ignition.startClient(
-				new ClientConfiguration().setAddresses("127.0.0.1:10800")
+				new ClientConfiguration().setAddresses("127.0.0.1:10800").setUserName("ignite").setUserPassword("ignite")
 				)) { 
 			ClientCacheConfiguration cacheCfg = new ClientCacheConfiguration()
 					.setName("user")

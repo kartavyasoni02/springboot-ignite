@@ -16,4 +16,6 @@ public interface UserRepository {
 
 	String getUserByEmailid(String emailId) throws ClientException, Exception;
 
+	void loadCache() throws ClientException, Exception;
+
 }
