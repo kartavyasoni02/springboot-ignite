@@ -1,68 +1,96 @@
 package com.teacheron.sales.repositories.impl;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.stereotype.Component;
+import org.apache.ignite.Ignition;
+import org.apache.ignite.cache.CacheMode;
+import org.apache.ignite.cache.CacheWriteSynchronizationMode;
+import org.apache.ignite.client.ClientCache;
+import org.apache.ignite.client.ClientCacheConfiguration;
+import org.apache.ignite.client.ClientException;
+import org.apache.ignite.client.IgniteClient;
+import org.apache.ignite.configuration.ClientConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
 
+import com.google.gson.Gson;
 import com.teacheron.sales.entities.UserEntry;
-import com.teacheron.sales.repositories.UserStore;
+import com.teacheron.sales.repositories.UserRepository;
 
-@Component
-public class IgniteUserStore implements UserStore {
-	
-	/*
-	 * @Autowired private Ignite ignite;
-	 */
-	
+@Repository
+public class UserRepositoryImpl implements UserRepository {
+
+	// Spring Boot will create and configure DataSource and JdbcTemplate
+	// To use it, just @Autowired
+	@Autowired
+	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+
 	@Override
-    public UserEntry createUserEntry(UserEntry userEntry) throws ClassNotFoundException, SQLException {
-		
-		try (PreparedStatement stmt =
-				getConnection().prepareStatement("INSERT INTO Users (id, firstName, lastName, address) VALUES (?, ?, ?, ?)")) {
+	public UserEntry createUserEntry(UserEntry userEntry) throws ClientException, Exception {
+		String sql = "INSERT INTO users (firstName, lastName, address, emailId) "
+				+ "VALUES (:firstName, :lastName, :address, :emailId)";
+		MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+		mapSqlParameterSource.addValue("firstName", userEntry.getFirstName());
+		mapSqlParameterSource.addValue("lastName", userEntry.getLastName());
+		mapSqlParameterSource.addValue("address", userEntry.getAddress());
+		mapSqlParameterSource.addValue("emailId", userEntry.getEmailId());
 
-		    stmt.setInt(1, userEntry.getId());
-		    stmt.setString(2, userEntry.getFirstName());
-		    stmt.setString(3, userEntry.getLastName());
-		    stmt.setString(4, userEntry.getAddress());
-		    stmt.executeUpdate();
-		}
+		namedParameterJdbcTemplate.update(sql, mapSqlParameterSource);
+		updateCache(userEntry);
 		return userEntry;
-    }
-	
+
+
+	}
+
 	@Override
-    public List<UserEntry> getAllUsers() throws ClassNotFoundException, SQLException {
-		 List<UserEntry> userList = null;
-			// Get data
-	        try (Statement stmt = getConnection().createStatement()) {
-	            try (ResultSet rs =
-	                         stmt.executeQuery("SELECT firstName, lastName, address FROM Users")) {
+	public String getUserByEmailid(String emailId) throws ClientException, Exception {
+		try (IgniteClient client = Ignition.startClient(
+				new ClientConfiguration().setAddresses("127.0.0.1:10800")
+				)) { 
+			ClientCacheConfiguration cacheCfg = new ClientCacheConfiguration()
+					.setName("user")
+					.setCacheMode(CacheMode.REPLICATED)
+					.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
 
-	                userList = new ArrayList<>();
-	                while (rs.next()) {
-	                	UserEntry user = new UserEntry();
-	                	user.setFirstName(rs.getString("firstName"));
-	                	user.setLastName(rs.getString("lastName"));
-	                	user.setAddress(rs.getString("address"));
-	                	userList.add(user);
-	                }
-	                    
-	            }
-	        }
-			return userList;
+			ClientCache<String, String> cache = client.getOrCreateCache(cacheCfg);
+			return cache.get(emailId);
 
-    }
-	
-	public Connection getConnection() throws ClassNotFoundException, SQLException {
-		Class.forName("org.apache.ignite.IgniteJdbcThinDriver");
-		// Open JDBC connection
-		return DriverManager.getConnection("jdbc:ignite:thin://127.0.0.1:10800;user=ignite;password=ignite");
-    }
+		}
+	}
 
+	@Override
+	public List<UserEntry> getAllUsers() {
+
+		String sql = "SELECT id, firstName, lastName, address, emailId FROM users";
+		return namedParameterJdbcTemplate.query(sql, (rs, rowNum) ->
+		new UserEntry(
+				rs.getInt("id"),
+				rs.getString("firstName"),
+				rs.getString("lastName"),
+				rs.getString("address"),
+				rs.getString("emailId")
+				));
+	}
+
+	@Override
+	public void updateCache(UserEntry user) throws ClientException, Exception {
+		try (IgniteClient client = Ignition.startClient(
+				new ClientConfiguration().setAddresses("127.0.0.1:10800")
+				)) { 
+			ClientCacheConfiguration cacheCfg = new ClientCacheConfiguration()
+					.setName("user")
+					.setCacheMode(CacheMode.REPLICATED)
+					.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
+
+			ClientCache<String, String> cache = client.getOrCreateCache(cacheCfg);
+			Gson gson = new Gson();
+
+			String json = gson.toJson(user);
+			cache.put(user.getEmailId(), json);
+
+		}
+	}
 }
