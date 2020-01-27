@@ -1,6 +1,10 @@
 package com.teacheron.sales.entities;
 
 import org.apache.ignite.cache.query.annotations.QuerySqlField;
+/**
+ * @author kartavya
+ *
+ */
 public class UserEntry {
 	
 	@QuerySqlField(index = true)
@@ -14,6 +18,21 @@ public class UserEntry {
 	
 	@QuerySqlField(index = true)
 	private String address;
+	
+	private String emailId;
+	
+	public UserEntry() {
+		super();
+	}
+
+	public UserEntry(Integer id, String firstName, String lastName, String address, String emailId) {
+		super();
+		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.address = address;
+		this.emailId = emailId;
+	}
 
 	public Integer getId() {
 		return id;
@@ -46,6 +65,13 @@ public class UserEntry {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-	
+
+	public String getEmailId() {
+		return emailId;
+	}
+
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
+	}
 	
 }

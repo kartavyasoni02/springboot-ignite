@@ -26,9 +26,9 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
-	@GetMapping("/{userId}")
-	public UserDto getUser(@PathVariable(name = "userId") Integer userId){
-		return userService.getUser(userId);
+	@GetMapping("/{emailId}")
+	public String getUser(@PathVariable(name = "emailId") String emailId) throws ClientException, Exception{
+		return userService.getUser(emailId);
 	}
 
 	@GetMapping()

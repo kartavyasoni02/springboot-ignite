@@ -10,8 +10,6 @@ import com.teacheron.sales.dto.UserDto;
 
 public interface UserService {
 
-	public UserDto getUser(Integer userId);
-
     public List<UserDto> getUsers() throws ClientException, Exception;
 
 	public UserDto saveUser(@Valid UserDto userDto) throws ClientException, Exception;
@@ -19,5 +17,7 @@ public interface UserService {
 	public UserDto updateUser(@Valid UserDto userDto);
 
 	public void deleteUser(@Valid UserDto userDto);
+
+	String getUser(String emailId) throws ClientException, Exception;
 
 }

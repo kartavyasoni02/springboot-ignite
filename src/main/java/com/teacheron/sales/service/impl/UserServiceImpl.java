@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.teacheron.sales.dto.UserDto;
 import com.teacheron.sales.literals.EmailLiterals;
 import com.teacheron.sales.mapper.UserMapper;
-import com.teacheron.sales.repositories.UserStore;
+import com.teacheron.sales.repositories.UserRepository;
 import com.teacheron.sales.service.UserService;
 import com.teacheron.sales.utility.EmailContents;
 
@@ -22,19 +22,19 @@ public class UserServiceImpl implements UserService {
 	private MailClient mailClient;
 	
 	@Autowired
-	private UserStore userStore;
+	private UserRepository userStore;
 	
 	@Autowired
 	private UserMapper userMapper;
 	
 	@Override
-	public UserDto getUser(Integer userId) {
-		return null;
-	}
-
-	@Override
 	public List<UserDto> getUsers() throws ClientException, Exception {
 		return userMapper.mapToDtos(userStore.getAllUsers());
+	}
+	
+	@Override
+	public String getUser(String emailId) throws ClientException, Exception {
+		return userStore.getUserByEmailid(emailId);
 	}
 
 	@Override

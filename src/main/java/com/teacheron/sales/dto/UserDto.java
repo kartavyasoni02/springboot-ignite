@@ -23,6 +23,8 @@ public class UserDto {
 	@NotEmpty(message = "{error.user.address.empty}")
 	@Size(max = 50, message = "{error.user.address.max}")
 	private String address;
+	
+	private String emailId;
 
 	public Integer getId() {
 		return id;
@@ -55,6 +57,12 @@ public class UserDto {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-	
-	
+
+	public String getEmailId() {
+		return emailId;
+	}
+
+	public void setEmailId(String emailId) {
+		this.emailId = emailId;
+	}
 }
