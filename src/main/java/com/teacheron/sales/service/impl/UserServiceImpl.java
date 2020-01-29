@@ -2,7 +2,6 @@ package com.teacheron.sales.service.impl;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
 import org.apache.ignite.client.ClientException;
@@ -28,7 +27,7 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private UserMapper userMapper;
 	
-	@PostConstruct
+	//@PostConstruct
 	public void loadCache() throws ClientException, Exception {
 		userStore.loadCache();
 	}
