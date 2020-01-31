@@ -16,29 +16,35 @@ public abstract class GenericServiceImpl<T> implements GenericService<T> {
 	public abstract GenericDAO<T, Integer> getBaseDAO();
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = false, value = "transactionManager", rollbackFor = Throwable.class)
 	public Integer create(T entity) throws ValidationException {
-		return (Integer) getBaseDAO().create(entity);
+		return getBaseDAO().create(entity);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = false, value = "transactionManager", rollbackFor = Throwable.class)
 	public void update(T entity) throws ValidationException {
 		getBaseDAO().merge(entity);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = false, value = "transactionManager", rollbackFor = Throwable.class)
 	public void delete(T entity) {
 		getBaseDAO().delete(entity);
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED, readOnly = false)
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = false, value = "transactionManager", rollbackFor = Throwable.class)
 	public void delete(Integer id) {
 		T entity = getBaseDAO().load(id);
 		getBaseDAO().delete(entity);
 	}
+	
+	@Override
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = false, value = "transactionManager",rollbackFor = Throwable.class)
+    public void deleteAll(List<Integer> ids) {
+        getBaseDAO().deleteAll(ids);
+    }
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
@@ -59,9 +65,4 @@ public abstract class GenericServiceImpl<T> implements GenericService<T> {
         return getBaseDAO().findAll(ids);
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED, readOnly = false)
-    public void deleteAll(List<Integer> ids) {
-        getBaseDAO().deleteAll(ids);
-    }
 }

@@ -1,24 +1,37 @@
 package com.teacheron.sales.entities;
 
-import org.apache.ignite.cache.query.annotations.QuerySqlField;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 /**
  * @author kartavya
  *
  */
+@Entity
+@Table(name = "users")
+@SequenceGenerator(name = "generator")
 public class UserEntry {
 	
-	@QuerySqlField(index = true)
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column
 	private Integer id;
 
-	@QuerySqlField(index = true)
+	@Column
 	private String firstName;
 	
-	@QuerySqlField(index = true)
+	@Column
 	private String lastName;
 	
-	@QuerySqlField(index = true)
+	@Column
 	private String address;
 	
+	@Column
 	private String emailId;
 	
 	public UserEntry() {

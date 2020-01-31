@@ -2,49 +2,62 @@ package com.teacheron.sales.service.impl;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
 import org.apache.ignite.client.ClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.teacheron.sales.dao.GenericDAO;
+import com.teacheron.sales.dao.UserDao;
 import com.teacheron.sales.dto.UserDto;
+import com.teacheron.sales.entities.UserEntry;
 import com.teacheron.sales.literals.EmailLiterals;
 import com.teacheron.sales.mapper.UserMapper;
-import com.teacheron.sales.repositories.UserRepository;
 import com.teacheron.sales.service.UserService;
 import com.teacheron.sales.utility.EmailContents;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends GenericServiceImpl<UserEntry> implements UserService {
 	
 	@Autowired
 	private MailClient mailClient;
 	
 	@Autowired
-	private UserRepository userStore;
-	
-	@Autowired
 	private UserMapper userMapper;
 	
-	//@PostConstruct
+	@Autowired
+	private UserDao userDao;
+	
+	@Override
+	public GenericDAO<UserEntry, Integer> getBaseDAO() {
+		return userDao;
+	}
+	
+	@PostConstruct
 	public void loadCache() throws ClientException, Exception {
-		userStore.loadCache();
+		userDao.loadCache();
 	}
 	
 	@Override
-	public List<UserDto> getUsers() throws ClientException, Exception {
-		return userMapper.mapToDtos(userStore.getAllUsers());
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+	public List<UserDto> getUsers() throws Exception {
+		return userMapper.mapToDtos(userDao.findAll());
 	}
 	
 	@Override
-	public String getUser(String emailId) throws ClientException, Exception {
-		return userStore.getUserByEmailid(emailId);
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+	public String getUser(String emailId) throws Exception {
+		return userDao.getUserByEmailid(emailId);
 	}
 
 	@Override
-	public UserDto saveUser(@Valid UserDto userDto) throws ClientException, Exception {
-		return userMapper.mapToDto(userStore.createUserEntry(userMapper.mapToEntry(userDto)));
+	@Transactional(propagation = Propagation.REQUIRED, readOnly = false, value = "transactionManager", rollbackFor = Throwable.class)
+	public Integer saveUser(@Valid UserDto userDto) throws Exception {
+		return userDao.createUser(userMapper.mapToEntry(userDto));
 	}
 
 	@Override

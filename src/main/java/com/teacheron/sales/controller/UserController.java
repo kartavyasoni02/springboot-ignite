@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.apache.ignite.client.ClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,17 +26,17 @@ public class UserController {
 	private UserService userService;
 
 	@GetMapping("/{emailId}")
-	public String getUser(@PathVariable(name = "emailId") String emailId) throws ClientException, Exception{
+	public String getUser(@PathVariable(name = "emailId") String emailId) throws Exception{
 		return userService.getUser(emailId);
 	}
 
 	@GetMapping()
-	public List<UserDto> getUser() throws ClientException, Exception{
+	public List<UserDto> getUser() throws Exception{
 		return userService.getUsers();
 	}
 	
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE , produces = MediaType.APPLICATION_JSON_VALUE)
-	public UserDto saveUser(@Valid @RequestBody UserDto userDto) throws ClientException, Exception{
+	public Integer saveUser(@Valid @RequestBody UserDto userDto) throws Exception{
 		return userService.saveUser(userDto);
 	}
 	
