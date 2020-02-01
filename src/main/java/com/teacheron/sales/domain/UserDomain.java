@@ -1,4 +1,4 @@
-package com.teacheron.sales.entities;
+package com.teacheron.sales.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,7 +14,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "users")
 @SequenceGenerator(name = "generator")
-public class UserEntry {
+public class UserDomain {
 	
 	
 	@Id
@@ -34,11 +34,11 @@ public class UserEntry {
 	@Column
 	private String emailId;
 	
-	public UserEntry() {
+	public UserDomain() {
 		super();
 	}
 
-	public UserEntry(Integer id, String firstName, String lastName, String address, String emailId) {
+	public UserDomain(Integer id, String firstName, String lastName, String address, String emailId) {
 		super();
 		this.id = id;
 		this.firstName = firstName;

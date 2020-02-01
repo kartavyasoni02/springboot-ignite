@@ -514,7 +514,6 @@ public class GenericDAOImpl<E, PK extends java.io.Serializable> implements Gener
 	@Override
 	public E checkDuplicate(String column, String value, Integer id)
 			throws TeacheronException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

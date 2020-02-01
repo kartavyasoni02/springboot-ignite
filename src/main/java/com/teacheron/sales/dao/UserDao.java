@@ -2,16 +2,16 @@ package com.teacheron.sales.dao;
 
 import org.apache.ignite.client.ClientException;
 
-import com.teacheron.sales.entities.UserEntry;
+import com.teacheron.sales.domain.UserDomain;
 
-public interface UserDao extends GenericDAO<UserEntry, Integer>{
-
-	String getUserByEmailid(String emailId) throws ClientException, Exception;
+public interface UserDao extends GenericDAO<UserDomain, Integer>{
 
 	void loadCache() throws ClientException, Exception;
 
-	void updateCache(UserEntry user) throws ClientException, Exception;
+	Integer createUser(UserDomain user) throws ClientException, Exception;
 
-	Integer createUser(UserEntry user) throws ClientException, Exception;
+	UserDomain findByEmailId(String emailId);
+
+	String getUserByEmailid(String emailId) throws ClientException, Exception;
 
 }

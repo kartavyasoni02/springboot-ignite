@@ -2,81 +2,68 @@ package com.teacheron.sales.dao.impl;
 
 import java.util.List;
 
-import org.apache.ignite.Ignition;
-import org.apache.ignite.cache.CacheMode;
-import org.apache.ignite.cache.CacheWriteSynchronizationMode;
-import org.apache.ignite.client.ClientCache;
-import org.apache.ignite.client.ClientCacheConfiguration;
 import org.apache.ignite.client.ClientException;
-import org.apache.ignite.client.IgniteClient;
-import org.apache.ignite.configuration.ClientConfiguration;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.Gson;
 import com.teacheron.sales.dao.UserDao;
-import com.teacheron.sales.entities.UserEntry;
+import com.teacheron.sales.domain.UserDomain;
+import com.teacheron.sales.ignite.IgniteUserCache;
 
 @Repository("userDao")
-public class UserDaoImpl extends GenericDAOImpl<UserEntry, Integer> implements UserDao{
+@PropertySource(value = { "classpath:application.properties" })
+public class UserDaoImpl extends GenericDAOImpl<UserDomain, Integer> implements UserDao{
+
+	@Autowired
+	private Environment environment;
 
 	public UserDaoImpl() {
-		super(UserEntry.class);
+		super(UserDomain.class);
 	}
-	
+
 	@Override
-	public Integer createUser(UserEntry user) throws ClientException, Exception{
+	public Integer createUser(UserDomain user) throws ClientException, Exception{
 		Integer id = create(user);
-		updateCache(user);
+		IgniteUserCache cache = getCache();
+		cache.updateCache(user);
 		return id;
+	}
+
+	private IgniteUserCache getCache() throws Exception {
+		return new IgniteUserCache(environment.getRequiredProperty("teacheron.ignite.address"), environment.getRequiredProperty("teacheron.ignite.username"), 
+				environment.getRequiredProperty("teacheron.ignite.username-password"));
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
 	public void loadCache() throws ClientException, Exception {
-		List<UserEntry> allusers = findAll();
+		
+		List<UserDomain> allusers = findAll();
 		allusers.stream().forEach(user -> {
 			try {
-				updateCache(user);
+				IgniteUserCache cache = getCache();
+				cache.updateCache(user);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		});
 	}
-	
+
 	@Override
-	public void updateCache(UserEntry user) throws ClientException, Exception {
-		try (IgniteClient client = Ignition.startClient(
-				new ClientConfiguration().setAddresses("127.0.0.1:10800").setUserName("ignite").setUserPassword("ignite")
-				)) { 
-			ClientCacheConfiguration cacheCfg = new ClientCacheConfiguration()
-					.setName("user")
-					.setCacheMode(CacheMode.REPLICATED)
-					.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
-
-			ClientCache<String, String> cache = client.getOrCreateCache(cacheCfg);
-			Gson gson = new Gson();
-
-			String json = gson.toJson(user);
-			cache.put(user.getEmailId(), json);
-
-		}
+	public UserDomain findByEmailId(String emailId) {
+		return (UserDomain) getCriteria().add(Restrictions.eq("emailId", emailId)).uniqueResult();
 	}
-	
+
 	@Override
 	public String getUserByEmailid(String emailId) throws ClientException, Exception {
-		try (IgniteClient client = Ignition.startClient(
-				new ClientConfiguration().setAddresses("127.0.0.1:10800").setUserName("ignite").setUserPassword("ignite")
-				)) { 
-			ClientCacheConfiguration cacheCfg = new ClientCacheConfiguration()
-					.setName("user")
-					.setCacheMode(CacheMode.REPLICATED)
-					.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
+		IgniteUserCache cache = getCache();
+		return cache.getUserByEmailid(emailId);
 
-			ClientCache<String, String> cache = client.getOrCreateCache(cacheCfg);
-			return cache.get(emailId);
-
-		}
 	}
+
 }

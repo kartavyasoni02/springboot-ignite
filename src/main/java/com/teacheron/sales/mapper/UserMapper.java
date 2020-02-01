@@ -6,32 +6,32 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
+import com.teacheron.sales.domain.UserDomain;
 import com.teacheron.sales.dto.UserDto;
-import com.teacheron.sales.entities.UserEntry;
 
 @Component
 public class UserMapper {
 
-	public List<UserDto> mapToDtos(List<UserEntry> userEntryList){
+	public List<UserDto> mapToDtos(List<UserDomain> userEntryList){
 		List<UserDto> list = new ArrayList<>();
 		userEntryList.stream().forEach(en -> list.add(mapToDto(en)));
 		return list;
 	}
 	
-	public List<UserEntry> mapToEntities(List<UserDto> userDtoList){
-		List<UserEntry> list = new ArrayList<>();
-		userDtoList.stream().forEach(dto -> list.add(mapToEntry(dto)));
+	public List<UserDomain> mapToEntities(List<UserDto> userDtoList){
+		List<UserDomain> list = new ArrayList<>();
+		userDtoList.stream().forEach(dto -> list.add(mapToDomain(dto)));
 		return list;
 	}
 	
-	public UserDto mapToDto(UserEntry userEntry){
+	public UserDto mapToDto(UserDomain userEntry){
 		UserDto userDto = new UserDto();
 		BeanUtils.copyProperties(userEntry, userDto);
 		return userDto;
 	}
 	
-	public UserEntry mapToEntry(UserDto userDto){
-		UserEntry userEntry = new UserEntry();
+	public UserDomain mapToDomain(UserDto userDto){
+		UserDomain userEntry = new UserDomain();
 		BeanUtils.copyProperties(userDto, userEntry);
 		return userEntry;
 	}

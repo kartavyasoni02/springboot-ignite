@@ -3,7 +3,6 @@ package com.teacheron.sales.service.impl;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.validation.Valid;
 
 import org.apache.ignite.client.ClientException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,18 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.teacheron.sales.dao.GenericDAO;
 import com.teacheron.sales.dao.UserDao;
+import com.teacheron.sales.domain.UserDomain;
 import com.teacheron.sales.dto.UserDto;
-import com.teacheron.sales.entities.UserEntry;
-import com.teacheron.sales.literals.EmailLiterals;
+import com.teacheron.sales.exceptions.UserAlreadyExistException;
 import com.teacheron.sales.mapper.UserMapper;
 import com.teacheron.sales.service.UserService;
-import com.teacheron.sales.utility.EmailContents;
 
 @Service
-public class UserServiceImpl extends GenericServiceImpl<UserEntry> implements UserService {
-	
-	@Autowired
-	private MailClient mailClient;
+public class UserServiceImpl extends GenericServiceImpl<UserDomain> implements UserService {
 	
 	@Autowired
 	private UserMapper userMapper;
@@ -33,7 +28,7 @@ public class UserServiceImpl extends GenericServiceImpl<UserEntry> implements Us
 	private UserDao userDao;
 	
 	@Override
-	public GenericDAO<UserEntry, Integer> getBaseDAO() {
+	public GenericDAO<UserDomain, Integer> getBaseDAO() {
 		return userDao;
 	}
 	
@@ -56,23 +51,11 @@ public class UserServiceImpl extends GenericServiceImpl<UserEntry> implements Us
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = false, value = "transactionManager", rollbackFor = Throwable.class)
-	public Integer saveUser(@Valid UserDto userDto) throws Exception {
-		return userDao.createUser(userMapper.mapToEntry(userDto));
+	public Integer saveUser(UserDto userDto) throws Exception {
+		UserDomain userDomain = userDao.findByEmailId(userDto.getEmailId());
+		if(userDomain!=null) {
+			throw new UserAlreadyExistException("User already exist");
+		}
+		return userDao.createUser(userMapper.mapToDomain(userDto));
 	}
-
-	@Override
-	public UserDto updateUser(@Valid UserDto userDto) {
-		return null;
-	}
-
-	@Override
-	public void deleteUser(@Valid UserDto userDto) {
-	}
-
-	private void sendThankYouMail() {
-		EmailContents emailContents = new EmailContents("kartavya.soni02@gmail.com", EmailLiterals.THANK_YOU, EmailLiterals.SUCCESS);
-		emailContents.addEmailContents(EmailLiterals.CUSTOMER_FIRST_NAME_PARAM, "Kartavya");
-		mailClient.prepareAndSend(emailContents);
-	}
-
 }

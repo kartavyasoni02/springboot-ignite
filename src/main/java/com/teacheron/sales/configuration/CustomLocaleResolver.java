@@ -15,7 +15,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
-
+/*
+ * This is an example of validation message handling.
+ * This class for setup locale in system 
+ * based on locale validation message will change 
+ * and pick data from properties file accordingly
+ */
 @Configuration
 public class CustomLocaleResolver extends AcceptHeaderLocaleResolver implements WebMvcConfigurer {
 	List<Locale> LOCALES = Arrays.asList(
