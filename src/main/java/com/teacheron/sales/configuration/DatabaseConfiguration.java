@@ -24,8 +24,8 @@ public class DatabaseConfiguration {
 
 	private static final Logger logger = LogManager.getLogger(DatabaseConfiguration.class);
 
-	private static final String PROPERTY_NAME_HIBERNATE_DIALECT              = "teacheron.hibernate.dialect";
-	private static final String PROPERTY_NAME_HIBERNATE_SHOW_SQL             = "teacheron.hibernate.show_sql";
+	private static final String PROPERTY_NAME_HIBERNATE_DIALECT              = "hibernate.dialect";
+	private static final String PROPERTY_NAME_HIBERNATE_SHOW_SQL             = "hibernate.show_sql";
 	private static final String PROPERTY_NAME_ENTITYMANAGER_PACKAGES_TO_SCAN = "teacheron.hibernate.packages.to.scan";
 	
 	@Autowired
@@ -33,8 +33,8 @@ public class DatabaseConfiguration {
 	
 	private Properties hibProperties() {
 		Properties properties = new Properties();
-		properties.put(PROPERTY_NAME_HIBERNATE_DIALECT, environment.getRequiredProperty(PROPERTY_NAME_HIBERNATE_DIALECT));
-		properties.put(PROPERTY_NAME_HIBERNATE_SHOW_SQL, environment.getRequiredProperty(PROPERTY_NAME_HIBERNATE_SHOW_SQL));
+		properties.put(PROPERTY_NAME_HIBERNATE_DIALECT, environment.getRequiredProperty("teacheron.hibernate.dialect"));
+		properties.put(PROPERTY_NAME_HIBERNATE_SHOW_SQL, environment.getRequiredProperty("teacheron.hibernate.show_sql"));
 		properties.put("connection.provider_class", environment.getRequiredProperty("teacheron.hibernate.hikari.type"));
 		properties.put("hikari.maximumPoolSize", environment.getRequiredProperty("teacheron.hibernate.hikari.connection-timeout"));
 		properties.put("hikari.connectionTimeout", environment.getRequiredProperty("teacheron.hibernate.hikari.minimum-idle"));

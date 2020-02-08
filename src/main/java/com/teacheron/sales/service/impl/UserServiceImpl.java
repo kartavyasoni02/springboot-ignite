@@ -32,7 +32,7 @@ public class UserServiceImpl extends GenericServiceImpl<UserDomain> implements U
 		return userDao;
 	}
 	
-	@PostConstruct
+	//@PostConstruct
 	public void loadCache() throws ClientException, Exception {
 		userDao.loadCache();
 	}
